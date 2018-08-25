@@ -11,18 +11,45 @@ var subber = zmq.socket("sub")
 console.log("connect to pub")
 subber.connect("tcp://localhost:5556");
 
-subber.subscribe('ge'); // felismerem, de nem értem miért nem tudom szépen kiolvasni akkor :(
+subber.subscribe(''); // felismerem, de nem értem miért nem tudom szépen kiolvasni akkor :(
 console.log('Subscriber connected to port 5556');
 
-subber.on('message', function(topic, message) {
-  console.log(topic.toString("utf8"));
+let adsDataArray = []
+subber.on('message', function(data) {
+  //console.log("raw:", data);
+  //console.log(data.toString("utf8"));
+  //console.log(data.toString("ascii"));
+  //console.log(data.toString("binary"));
+  //console.log(data.toString("base32"));
+  //console.log(data.toString("base64"));
+  //console.log(data.toString("hex"));
+    
+    //console.log("converted:", hexToBytes(data.toString("hex")))
+    console.log(data);
+    console.log(data.toString("hex"))
+   let dataArray = hexToBytes(data.toString("hex"))
+    //console.log(dataArray);
+ // mainWindow.send("ads-data", adsDataArray);
 });
+
+function hexToBytes(hex) { 
+    // took 0.020ms - 0.250ms 
+    for (var bytes = [], c = 0; c < hex.length; c += 8) // start from the 2 to cut down the firs byte, it is kinda dummy
+    bytes.push(parseInt(hex.substr(c, 8), 16));
+    //console.timeEnd("convert")
+    return bytes;
+}
+
+function reverse(s){
+    return s.split("").reverse().join("");
+}
+
 
 var x = 0;
 
 console.log("Connecting to the server...");
-requester.connect("tcp://localhost:5555");
-
+let ret = requester.connect("tcp://localhost:5555");
+console.log("ret", ret);
 console.log("Sending Start request");
 requester.send("start");
 
@@ -47,7 +74,7 @@ setTimeout(function() {
   requester.send("stopp");
   console.log("Stop message is sent!")
   step = 2;
-},10000);
+},360000);
 
 process.on('SIGINT', function() {
   requester.close();
