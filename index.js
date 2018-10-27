@@ -1,9 +1,10 @@
 // Hello World client
 // Connects REQ socket to tcp://localhost:5555
 // Sends "Hello" to server.
+//TODO make E2E teszt here
 
 var zmq = require('zeromq');
-
+var readline = require("readline-sync");
 // socket to talk to server
 
 var requester = zmq.socket('req');
@@ -56,7 +57,7 @@ requester.send("start");
 let step = 0;
 
 requester.on("message", function(reply) {
-  console.log(reply.toString());
+  console.log("message", reply.toString());
   switch(step) {
     case 0: // getting answer for the performed subscription
       evaluateReply(reply);
@@ -70,11 +71,14 @@ requester.on("message", function(reply) {
   }
 });
 
-setTimeout(function() {
-  requester.send("stopp");
-  console.log("Stop message is sent!")
-  step = 2;
-},360000);
+var name = readline.question("What is your name?");
+requester.send("stopp");
+step = 2;
+// setTimeout(function() {
+//   requester.send("stopp");
+//   console.log("Stop message is sent!")
+//   step = 2;
+// },5000);
 
 process.on('SIGINT', function() {
   requester.close();
@@ -88,9 +92,9 @@ function evaluateReply(reply) {
       requester.close();
       process.exit();
     }
-  } else if(reply === "er") {
+  } else if(reply.includes("er")) {
     console.error("error occured!");
-  } else if(reply === "uk") {
+  } else if(reply.includes("uk")) {
     console.warn("Server didnt understand the message!");
   } else {
     console.warn("unknown reply from the server");
